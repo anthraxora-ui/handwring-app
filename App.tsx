@@ -38,18 +38,37 @@ const App: React.FC = () => {
     return () => clearTimeout(handler);
   }, [content]);
 
-  // Initial Load
+  // ============================================================
+  // 👂 THE LISTENER (This connects your App to ChatGPT)
+  // ============================================================
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Check if the message comes from ChatGPT/MCP
+      if (event.data && event.data.method === 'ui/notifications/tool-result') {
+        // Try to get the latex content
+        const newMath = event.data.params?.structuredContent?.latex || event.data.params?.content?.[0]?.text;
+        
+        if (newMath) {
+          console.log("Received Math from ChatGPT:", newMath);
+          // Append the new math to the editor
+          setContent((prevContent) => prevContent + "\n\n" + newMath);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+  // ============================================================
+
+  // Initial Load (Fonts)
   useEffect(() => {
     const loadResources = async () => {
       setProgress(10);
       setStatus('Loading MathJax...');
       
-      // Wait for MathJax
-      if (!(window as any).MJ_READY) {
-         // Fallback if event missed or not yet fired
-         // We'll proceed to font loading in parallel mostly, but let's delay slightly
-         await new Promise(r => setTimeout(r, 500));
-      }
+      // Wait for MathJax (simple delay fallback)
+      await new Promise(r => setTimeout(r, 500));
 
       try {
         setProgress(20);
