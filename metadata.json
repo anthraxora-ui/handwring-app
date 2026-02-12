@@ -1,0 +1,5 @@
+{
+  "name": " MathPro ",
+  "description": "A markdown editor with LaTeX support that renders content in a handwritten style using a custom SVG font.",
+  "requestFramePermissions": []
+}
